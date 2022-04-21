@@ -1,0 +1,196 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions">
+    <h:head>
+        <title>Mantenimiento de Persona</title>
+        <f:event listener="#{personaC.listar()}" type="preRenderView" />
+    </h:head>
+    <h:body>
+        <center>
+            <p:growl showDetail="true" id="messages" >
+                <p:autoUpdate/> 
+            </p:growl>
+            
+            <!--        Menu Principal  >--> 
+             <div class="card">
+    <h:form>
+        <p:megaMenu orientation="horizontal" autoDisplay="false">
+            <p:submenu label="Persona" icon="pi pi-usuarios">
+                <p:column>
+                    <p:submenu label="Persona">
+                        <p:menuitem value="Registrar"/>
+                        <p:menuitem value="Listado"/>
+                    </p:submenu>
+                </p:column>
+            </p:submenu>
+        </p:megaMenu>
+    </h:form>
+             </div>
+            <!--        Formulario del Persona  >--> 
+            <h:form id="frmRegPer">                 
+                <p:panelGrid columns="2" >
+                    <p:outputLabel value="Nombre" />                    
+                    <p:inputText value="#{personaC.persona.nombre}" />
+                   
+                    <p:outputLabel value="Apellido" />
+                    <p:inputText value="#{personaC.persona.apellido}" />  
+                    
+                    <p:outputLabel value="DNI" />
+                    <p:inputText placeholder="Numérico de 8 dígitos" value="#{personaC.persona.dni}" maxlength="8" >
+                        <p:keyFilter regEx="/[0-9]/" />
+                    </p:inputText>
+                    
+                    <p:outputLabel value="Dirección" />
+                    <p:inputText value="#{personaC.persona.dirreccion}" />  
+                    
+                     <p:outputLabel value="Nacimiento" />
+                    <p:calendar placeholder="dia-mes-año" value="#{personaC.persona.fecha}" id="fechaNac" locale="es" pattern="dd-MM-yyyy" mask="true" maxdate="@now"  />                    
+
+                    <p:outputLabel value="Telefono" />
+                    <p:inputText placeholder="Numérico de 9 dígitos" value="#{personaC.persona.telefono}" maxlength="9" >
+                        <p:keyFilter regEx="/[0-9]/" />
+                    </p:inputText>
+                    
+                    <p:outputLabel value="Tipo de Persona" />
+                    <p:selectOneRadio id="tipo" value="#{personaC.persona.tipo}" unselectable="true">
+                        <f:selectItem itemLabel="Cliente" itemValue="C" />
+                        <f:selectItem itemLabel="Afiliado" itemValue="A" />  
+                    </p:selectOneRadio>  
+               
+                    <p:commandButton actionListener="#{personaC.registrar()}" value="Registrar" update=":frmTablaPer:tablaPer"/>
+                    <p:commandButton value="Mostrar Fecha" update="fecha"/>
+                    <p:outputLabel value="Fecha" /> <p:outputLabel id="fecha" value="#{personaC.persona.fecha}" />
+                </p:panelGrid>   
+            </h:form>
+            <!--        Fin del Formulario Persona    >-->
+
+            <p:spacer height="0"/>        
+
+            <!--        Listado del Persona   >-->              
+            <h:form id="frmTablaPer">
+                <p:dataTable id="tablaPer" var="lista" value="#{personaC.lstPersona}" rowKey="#{persona2.codigo}"
+                             rows="10"
+                             paginator="true"
+                             paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                             currentPageReportTemplate="{startRecord}-{endRecord} of {totalRecords} records"
+                             rowsPerPageTemplate="5,10,15">   
+                    <f:facet name="header">
+                        Listado de Personas
+                    </f:facet>
+                    <p:column headerText="Codigo Persona">
+                        <h:outputText value="#{lista.codigo}" />
+                    </p:column>
+                    <p:column headerText="Nombre">
+                        <h:outputText value="#{lista.nombre}" />
+                    </p:column>
+                    <p:column headerText="Apellido">
+                        <h:outputText value="#{lista.apellido}" />
+                    </p:column>
+                    
+                    <p:column headerText="DNI">
+                        <h:outputText value="#{lista.dni}" />
+                    </p:column>
+                    
+                    <p:column headerText="Dirección">
+                        <h:outputText value="#{lista.dirreccion}" />
+                    </p:column>
+                    
+                    <p:column headerText="Nacimiento">
+                        <h:outputText value="#{lista.fecha}" />
+                    </p:column>
+                    
+                    <p:column headerText="Telefono">
+                        <h:outputText value="#{lista.telefono}" />
+                    </p:column>
+                    
+                    <p:column headerText="Tipo de Persona">
+                        <h:outputText value="#{lista.tipo}" >
+                            <f:converter converterId="tipoConverter" />
+                        </h:outputText>
+                    </p:column>
+                 
+   
+                    <p:column style="width: 40px">
+                        <p:commandButton icon="ui-icon-pencil"
+                                         oncomplete="PF('wdlgDatos').show();"
+                                         update=":frmModificar">
+                            <f:setPropertyActionListener value="#{lista}" target="#{personaC.persona}"/>
+                        </p:commandButton>
+                    </p:column>
+                    <p:column style="width: 40px">
+                        <p:commandButton icon="ui-icon-trash" actionListener="#{personaC.eliminar(lista)}" update="tablaPer" >
+                            <p:confirm header="Confirmación" message="¿Desea Eliminar?" icon="ui-icon-alert"/>
+                            <p:tooltip trackMouse="true"/>
+                        </p:commandButton>
+                        <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                            <p:commandButton value="Si" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"/>
+                            <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close"/>
+                        </p:confirmDialog>
+                    </p:column>
+                    <f:facet name="footer">
+                        EN TOTAL HAY #{fn:length(personaC.lstPersona)} REGISTROS.
+                    </f:facet>
+                </p:dataTable> 
+
+            </h:form>
+            <!--        Fin del Listado Persona  >-->  
+
+            <!--        Dialogo del Persona   >-->
+            <p:dialog header="Datos de la Persona" widgetVar="wdlgDatos" id="dlgDatos">
+                <h:form id="frmModificar">
+                    <p:panelGrid columns="2" > 
+                        
+                        <p:outputLabel value="Nombre" />
+                        <p:inputText value="#{personaC.persona.nombre}" />
+
+                        <p:outputLabel value="Apellido" />
+                        <p:inputText value="#{personaC.persona.apellido}" />
+                        
+                        <p:outputLabel value="DNI" />
+                        <p:inputText placeholder="Numérico de 8 dígitos" value="#{personaC.persona.dni}" maxlength="8" >
+                            <p:keyFilter regEx="/[0-9]/" />
+                        </p:inputText>
+                        
+                        <p:outputLabel value="Dirección" />
+                        <p:inputText value="#{personaC.persona.dirreccion}" /> 
+                        
+                        <p:outputLabel value="Nacimiento" />
+                        <p:calendar placeholder="dia-mes-año" value="#{personaC.persona.fecha}" id="fechaNac" locale="es" pattern="dd-MM-yyyy" mask="true" maxdate="@now"  />                 
+                         
+                        <p:outputLabel value="Telefono" />
+                        <p:inputText placeholder="Numérico de 9 dígitos" value="#{personaC.persona.telefono}" maxlength="9" >
+                            <p:keyFilter regEx="/[0-9]/" />
+                        </p:inputText>
+                        
+                        <p:outputLabel value="Tipo de Persona" />
+                        <p:selectOneRadio id="tipo" value="#{personaC.persona.tipo}" unselectable="true">
+                            <f:selectItem itemLabel="Cliente" itemValue="C" />
+                            <f:selectItem itemLabel="Afiliado" itemValue="A" />                    
+                        </p:selectOneRadio>  
+
+                        <p:commandButton id="btnModificar" value="Modificar" actionListener="#{personaC.modificar()}"
+                                         update="frmModificar :frmTablaPer:tablaPer" 
+                                         oncomplete="if(!args.validationFailed)PF('wdlgDatos').hide();">
+                            <p:confirm header="Confirmación" message="¿Deseas Modificar?" icon="ui-icon-alert"/>
+                        </p:commandButton>  
+                        <p:commandButton value="Cancelar" immediate="true" oncomplete="PF('wdlgDatos').hide();" />
+                        <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                            <p:commandButton value="Si" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"/>
+                            <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close"/>
+                        </p:confirmDialog>
+                    </p:panelGrid> 
+                </h:form>
+
+            </p:dialog>
+            <!--        Fin del Dialogo del Persona>-->
+
+        </center>
+    </h:body>
+    <h:outputScript library="js" name="..//resources/js/spanishLocales.js"/>
+</html>
+
